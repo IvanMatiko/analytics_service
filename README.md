@@ -1,109 +1,56 @@
-# Service Template
+# Analytics Service
 
-Стандартный шаблон проекта на SpringBoot
+## Overview
+Analytics Service is a backend application designed for collecting, processing, and analyzing data. It provides APIs for tracking user behavior, generating insights, and managing analytical reports to support decision-making processes.
 
-# Использованные технологии
+## Features
+- **Data Tracking:** Collect and store user activity and other analytical data.
+- **Data Aggregation:** Process large datasets to generate meaningful insights.
+- **Report Generation:** Create custom analytical reports.
+- **Real-Time Analytics:** Support for near real-time data processing.
+- **Swagger Documentation:** Provides detailed API documentation for integration.
 
-* [Spring Boot](https://spring.io/projects/spring-boot) – как основной фрэймворк
-* [PostgreSQL](https://www.postgresql.org/) – как основная реляционная база данных
-* [Redis](https://redis.io/) – как кэш и очередь сообщений через pub/sub
-* [testcontainers](https://testcontainers.com/) – для изолированного тестирования с базой данных
-* [Liquibase](https://www.liquibase.org/) – для ведения миграций схемы БД
-* [Gradle](https://gradle.org/) – как система сборки приложения
-* [Lombok](https://projectlombok.org/) – для удобной работы с POJO классами
-* [MapStruct](https://mapstruct.org/) – для удобного маппинга между POJO классами
+## Getting Started
 
-# База данных
+### Prerequisites
+- Java 17
+- Docker (optional for containerized deployment)
+- Gradle
 
-* База поднимается в отдельном сервисе [infra](../infra)
-* Redis поднимается в единственном инстансе тоже в [infra](../infra)
-* Liquibase сам накатывает нужные миграции на голый PostgreSql при старте приложения
-* В тестах используется [testcontainers](https://testcontainers.com/), в котором тоже запускается отдельный инстанс
-  postgres
-* В коде продемонстрирована работа как с JdbcTemplate, так и с JPA (Hibernate)
+### Steps
+1. Clone the repository:
+   
+   git clone https://github.com/IvanMatiko/analytics_service.git
+   cd analytics_service
 
-# Как начать разработку начиная с шаблона?
+2. Build the project: ./gradlew build
 
-1. Сначала нужно склонировать этот репозиторий
+3. Run the application: ./gradlew bootRun
 
-```shell
-git clone https://github.com/FAANG-School/ServiceTemplate
-```
+# API Endpoints
+POST /analytics/events: Submit a new analytics event.
 
-2. Далее удаляем служебную директорию для git
+GET /analytics/reports: Retrieve a list of available reports.
 
-```shell
-# Переходим в корневую директорию проекта
-cd ServiceTemplate
-rm -rf .git
-```
+GET /analytics/reports/{id}: Get detailed information for a specific report.
 
-3. Далее нужно создать совершенно пустой репозиторий в github/gitlab
+DELETE /analytics/data: Clear stored analytical data.
 
-4. Создаём новый репозиторий локально и коммитим изменения
+# Technologies Used
 
-```shell
-git init
-git remote add origin <link_to_repo>
-git add .
-git commit -m "<msg>"
-```
+Java: Core programming language.
 
-Готово, можно начинать работу!
+Spring Boot: Framework for building backend services.
 
-# Как запустить локально?
+Gradle: Build and dependency management tool.
 
-Сначала нужно развернуть базу данных из директории [infra](../infra)
+Swagger: API documentation tool.
 
-Далее собрать gradle проект
+Docker: For containerized deployments.
 
-```shell
-# Нужно запустить из корневой директории, где лежит build.gradle.kts
-gradle build
-```
+Postgres: SQL database
 
-Запустить jar'ник
+Redis: cache and message broker
 
-```shell
-java -jar build/libs/ServiceTemplate-1.0.jar
-```
 
-Но легче всё это делать через IDE
-
-# Код
-
-RESTful приложения калькулятор с единственным endpoint'ом, который принимает 2 числа и выдает результаты их сложения,
-вычитаяни, умножения и деления
-
-* Обычная трёхслойная
-  архитектура – [Controller](src/main/java/faang/school/analytics/controller), [Service](src/main/java/faang/school/analytics/service), [Repository](src/main/java/faang/school/analytics/repository)
-* Слой Repository реализован и на jdbcTemplate, и на JPA (Hibernate)
-* Написан [GlobalExceptionHandler](src/main/java/faang/school/analytics/controller/GlobalExceptionHandler.java)
-  который умеет возвращать ошибки в формате `{"code":"CODE", "message": "message"}`
-* Используется TTL кэширование вычислений
-  в [CalculationTtlCacheService](src/main/java/faang/school/analytics/service/cache/CalculationTtlCacheService.java)
-* Реализован простой Messaging через [Redis pub/sub](https://redis.io/docs/manual/pubsub/)
-  * [Конфигурация](src/main/java/faang/school/analytics/config/RedisConfig.java) –
-    сетапится [RedisTemplate](https://docs.spring.io/spring-data/redis/docs/current/api/org/springframework/data/redis/core/RedisTemplate.html) –
-    класс, для удобной работы с Redis силами Spring
-  * [Отправитель](src/main/java/faang/school/analytics/service/messaging/RedisCalculationPublisher.java) – генерит
-    рандомные запросы и отправляет в очередь
-  * [Получатель](src/main/java/faang/school/analytics/service/messaging/RedisCalculationSubscriber.java) –
-    получает запросы и отправляет задачи асинхронно выполняться
-    в [воркер](src/main/java/faang/school/analytics/service/worker/CalculationWorker.java)
-
-# Тесты
-
-Написаны только для единственного REST endpoint'а
-* SpringBootTest
-* MockMvc
-* Testcontainers
-* AssertJ
-* JUnit5
-* Parameterized tests
-
-# TODO
-
-* Dockerfile, который подключается к сети запущенной postgres в docker-compose
-* Redis connectivity
-* ...
+   
